@@ -1,9 +1,12 @@
+#!/usr/local/bin/Rscript
+
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 # Short script to extract relevant data from COVID-19 database
-# v 0.1
+# v 0.1.1
 # 09-Apr-2020
 # Katie Heath: katie.heath@burnet.edu.au
+# Dr James Freeman: james@gp2u.com.au
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 
@@ -43,14 +46,13 @@ co19_t530_twjhe_dn = read_excel("./Data/HIRA COVID-19 Sample Data_20200325.xlsx"
 # 3.i. Table 1 - Demographic data
 #--------------------------------------
 
-table1 = co19_t200_trans_dn[,c(
+demographic_data = co19_t200_trans_dn[,c(
   "MID", "SEX_TP_CD", "PAT_AGE"
 )]
 
 # Get only the unique entries
 # there may be some individuals with >1 hospital record
-table1 = unique(table1)
-
+demographic_data = unique(demographic_data)
 
 
 #--------------------------------------
@@ -58,72 +60,72 @@ table1 = unique(table1)
 #--------------------------------------
 
 
-table2 = co19_t200_trans_dn[,c(
+care_info_covid = co19_t200_trans_dn[,c(
   "MID", "CL_CD","FOM_TP_CD","MAIN_SICK","SUB_SICK","DGSBJT_CD",
   "RECU_FR_DD","RECU_TO_DD","FST_DD","VST_DDCNT","RECU_DDCNT",
   "DGRSLT_TP_CD"
 )]
 
-# get only the medical records which match with table 1
-table2 = table2[which(table2$MID %in% table1$MID),]
+# get only the medical records which match with table 1 demographic data
+care_info_covid = care_info_covid[which(care_info_covid$MID %in% demographic_data$MID),]
 
 
 #--------------------------------------
-# 3.iii. Table 3 - Care information - MEDICAL HISTORY
+# 3.iii. Table 3 - Care information - PAST HISTORY
 #--------------------------------------
 
 
-table3 = co19_t200_twjhe_dn[,c(
+care_info_past_history = co19_t200_twjhe_dn[,c(
   "MID", "CL_CD","FOM_TP_CD","MAIN_SICK","SUB_SICK","DGSBJT_CD",
   "RECU_FR_DD","RECU_TO_DD","FST_DD","VST_DDCNT","RECU_DDCNT",
   "DGRSLT_TP_CD"
 )]
 
-# get only the medical records which match with table 1
-table3 = table3[which(table3$MID %in% table1$MID),]
+# get only the medical records which match with table 1 demographic data
+care_info_past_history = care_info_past_history[which(care_info_past_history$MID %in% demographic_data$MID),]
 
 
 #--------------------------------------
-# 3.iv. Table 4 - Care information - COVID
+# 3.iv. Table 4 - Medication information - COVID
 #--------------------------------------
 
-table4 = co19_t530_trans_dn[,c(
+medication_info_covid = co19_t530_trans_dn[,c(
   "MID", "PRSCP_GRANT_NO","TOT_INJC_DDCNT_EXEC_FQ", "GNL_CD"
 )]
 
-# get only the medical records which match with table 1
-table4 = table4[which(table4$MID %in% table1$MID),]
+# get only the medical records which match with table 1 demographic data
+medication_info_covid = medication_info_covid[which(medication_info_covid$MID %in% demographic_data$MID),]
 
 # Get the number of characters in the number/string
-nch = nchar(table4$PRSCP_GRANT_NO[1])
+nch = nchar(medication_info_covid$PRSCP_GRANT_NO[1])
 
 # separate PRSCP_GRANT_NO by year, month, day, remaining, etc
-table4$PRSCP_YEAR  = substring(table4$PRSCP_GRANT_NO, 1, 4)
-table4$PRSCP_MONTH  = substring(table4$PRSCP_GRANT_NO, 5, 6)
-table4$PRSCP_DAY  = substring(table4$PRSCP_GRANT_NO, 7, 8)
-table4$PRSCP_REM  = substring(table4$PRSCP_GRANT_NO, 9, nch)
+medication_info_covid$PRSCP_YEAR  = substring(medication_info_covid$PRSCP_GRANT_NO, 1, 4)
+medication_info_covid$PRSCP_MONTH  = substring(medication_info_covid$PRSCP_GRANT_NO, 5, 6)
+medication_info_covid$PRSCP_DAY  = substring(medication_info_covid$PRSCP_GRANT_NO, 7, 8)
+medication_info_covid$PRSCP_REM  = substring(medication_info_covid$PRSCP_GRANT_NO, 9, nch)
 
 
 #--------------------------------------
-# 3.v. Table 5 - Care information - MEDICAL HISTORY
+# 3.v. Table 5 - Medication information - PAST HISTORY
 #--------------------------------------
 
-table5 = co19_t530_twjhe_dn[,c(
+medication_info_past_history = co19_t530_twjhe_dn[,c(
   "MID", "PRSCP_GRANT_NO","TOT_INJC_DDCNT_EXEC_FQ", "GNL_CD"
 )]
 
-# get only the medical records which match with table 1
+# get only the medical records which match with table 1 demographic data
 # we expect there to be no records or overlap for the saple dataset
-table5 = table5[which(table5$MID %in% table1$MID),]
+medication_info_past_history = medication_info_past_history[which(medication_info_past_history$MID %in% demographic_data$MID),]
 
 # Get the number of characters in the number/string
-nch = nchar(table5$PRSCP_GRANT_NO[1])
+nch = nchar(medication_info_past_history$PRSCP_GRANT_NO[1])
 
 # separate PRSCP_GRANT_NO by year, month, day, remaining, etc
-table5$PRSCP_YEAR  = substring(table5$PRSCP_GRANT_NO, 1, 4)
-table5$PRSCP_MONTH  = substring(table5$PRSCP_GRANT_NO, 5, 6)
-table5$PRSCP_DAY  = substring(table5$PRSCP_GRANT_NO, 7, 8)
-table5$PRSCP_REM  = substring(table5$PRSCP_GRANT_NO, 9, nch)
+medication_info_past_history$PRSCP_YEAR  = substring(medication_info_past_history$PRSCP_GRANT_NO, 1, 4)
+medication_info_past_history$PRSCP_MONTH  = substring(medication_info_past_history$PRSCP_GRANT_NO, 5, 6)
+medication_info_past_history$PRSCP_DAY  = substring(medication_info_past_history$PRSCP_GRANT_NO, 7, 8)
+medication_info_past_history$PRSCP_REM  = substring(medication_info_past_history$PRSCP_GRANT_NO, 9, nch)
 
 
 
@@ -133,8 +135,8 @@ table5$PRSCP_REM  = substring(table5$PRSCP_GRANT_NO, 9, nch)
 
 # This section outpute the data into new .csv files which we can open and use.
 
-write.csv(table1, "./Results/table1.csv", row.names = F)
-write.csv(table2, "./Results/table2.csv", row.names = F)
-write.csv(table3, "./Results/table3.csv", row.names = F)
-write.csv(table4, "./Results/table4.csv", row.names = F)
-write.csv(table5, "./Results/table5.csv", row.names = F)
+write.csv(demographic_data, "./Results/demographic_data.csv", row.names = F)
+write.csv(care_info_covid, "./Results/care_info_covid.csv", row.names = F)
+write.csv(care_info_past_history, "./Results/care_info_past_history.csv", row.names = F)
+write.csv(medication_info_covid, "./Results/medication_info_covid.csv", row.names = F)
+write.csv(medication_info_past_history, "./Results/medication_info_past_history.csv", row.names = F)
